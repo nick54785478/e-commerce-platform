@@ -1,0 +1,47 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: inventory-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/inventory_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+
+axon:
+  axonserver:
+    servers: localhost:8124
+  serializer:
+    events: jackson
+    messages: jackson
+    general: jackson
+  eventhandling:
+    processors:
+      # 讓 inventory-event-handler 以 Tracking 模式運行
+      # 這樣才能透過重置 Token 來重播歷史事件
+      inventory-event-handler:
+        mode: tracking
+        initial-segment-count: 1
+      # Projector 也設定為 Tracking（已是預設值，明確宣告較清晰）
+      inventory-projector:
+        mode: tracking
+        initial-segment-count: 1
+
+logging:
+  level:
+    root: INFO
+    org.axonframework: INFO
+    com.omni.inventory: DEBUG
+  charset:
+    console: UTF-8
+    file: UTF-8

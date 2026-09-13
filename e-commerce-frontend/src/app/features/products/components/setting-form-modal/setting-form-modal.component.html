@@ -1,0 +1,87 @@
+<div class="modal-overlay animate-fade-in">
+  <div class="modal-content p-0 overflow-hidden bg-white shadow-6 border-round-xl" style="max-width: 600px; width: 90%; border: 1px solid var(--surface-border);" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="p-4 border-bottom-1 surface-border flex justify-content-between align-items-center surface-50">
+      <h2 class="m-0 text-xl font-bold text-900">{{ isEditMode ? 'Edit Setting' : 'New Setting' }}</h2>
+      <button class="p-link text-600 hover:text-900 transition-colors" (click)="closeModal()">
+        <i class="pi pi-times text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-4">
+      <form [formGroup]="settingForm" (ngSubmit)="onSubmit()" class="flex flex-column gap-4">
+        
+        <div class="grid">
+          <div class="col-12 md:col-6 flex flex-column gap-2">
+            <label class="font-semibold text-sm text-700 required-label">Tenant ID</label>
+            <input pInputText formControlName="tenantId" placeholder="e.g., TTRAVEL" class="w-full" />
+            <small class="p-error" *ngIf="settingForm.get('tenantId')?.invalid && settingForm.get('tenantId')?.touched">Tenant ID is required.</small>
+          </div>
+          
+          <div class="col-12 md:col-6 flex flex-column gap-2">
+            <label class="font-semibold text-sm text-700 required-label">Data Type</label>
+            <p-select [options]="dataTypeOptions" formControlName="dataType" optionLabel="label" optionValue="value" placeholder="Select Data Type" styleClass="w-full" (onChange)="onDataTypeChange($event)"></p-select>
+            <small class="p-error" *ngIf="settingForm.get('dataType')?.invalid && settingForm.get('dataType')?.touched">Data Type is required.</small>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="col-12 md:col-6 flex flex-column gap-2">
+            <label class="font-semibold text-sm text-700 required-label">Type</label>
+            <p-autoComplete formControlName="type" [suggestions]="filteredTypes" (completeMethod)="filterTypes($event)" [dropdown]="true" placeholder="e.g., product_category" styleClass="w-full" [inputStyle]="{'width':'100%'}"></p-autoComplete>
+            <small class="p-error" *ngIf="settingForm.get('type')?.invalid && settingForm.get('type')?.touched">Type is required.</small>
+          </div>
+
+          <div class="col-12 md:col-6 flex flex-column gap-2">
+            <label class="font-semibold text-sm text-700 required-label">Name</label>
+            <input pInputText formControlName="name" placeholder="e.g., Electronics" class="w-full" />
+            <small class="p-error" *ngIf="settingForm.get('name')?.invalid && settingForm.get('name')?.touched">Name is required.</small>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="col-12 md:col-6 flex flex-column gap-2">
+            <label class="font-semibold text-sm text-700 required-label">Code</label>
+            <input pInputText formControlName="code" placeholder="e.g., ELEC" class="w-full" />
+            <small class="p-error" *ngIf="settingForm.get('code')?.invalid && settingForm.get('code')?.touched">Code is required.</small>
+          </div>
+
+          <div class="col-12 md:col-6 flex flex-column gap-2">
+            <label class="font-semibold text-sm text-700">Value</label>
+            <input pInputText formControlName="value" placeholder="Optional internal value" class="w-full" />
+          </div>
+        </div>
+
+        <div class="flex flex-column gap-2">
+          <label class="font-semibold text-sm text-700">Description</label>
+          <input pInputText formControlName="description" placeholder="Short description" class="w-full" />
+        </div>
+
+        <div class="grid">
+          <div class="col-12 md:col-6 flex flex-column gap-2">
+            <label class="font-semibold text-sm text-700 required-label">Priority</label>
+            <p-inputNumber formControlName="priorityNo" class="w-full" styleClass="w-full" [showButtons]="true" [min]="1"></p-inputNumber>
+          </div>
+
+          <div class="col-12 md:col-6 flex flex-column gap-2" *ngIf="isEditMode">
+            <label class="font-semibold text-sm text-700 required-label">Status</label>
+            <p-select [options]="statusOptions" formControlName="activeFlag" optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="p-4 border-top-1 surface-border flex justify-content-end gap-3 surface-50">
+      <p-button label="Cancel" styleClass="p-button-text p-button-secondary" (click)="closeModal()"></p-button>
+      <p-button [label]="isEditMode ? 'Save Changes' : 'Create Setting'" 
+                styleClass="p-button-primary" 
+                (click)="onSubmit()" 
+                [loading]="submitting"></p-button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,68 @@
+﻿<p-dialog [header]="isEditMode ? 'Edit Product' : 'New Product'" 
+          [(visible)]="isVisible" 
+          [modal]="true" 
+          [closable]="true"
+          (onHide)="onCancel()"
+          [style]="{ width: '50vw' }" 
+          [breakpoints]="{ '960px': '75vw', '640px': '90vw' }">
+  
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-column gap-4 py-4">
+    
+    <div class="flex flex-column md:flex-row gap-4">
+      <div class="flex flex-column gap-2 flex-auto">
+        <label for="name" class="font-bold required-label">Product Name</label>
+        <input pInputText id="name" formControlName="name" placeholder="e.g. Wireless Headphones" class="w-full" />
+      </div>
+      <div class="flex flex-column gap-2 flex-auto">
+        <label for="price" class="font-bold required-label">Price ($)</label>
+        <p-inputNumber inputId="price" formControlName="price" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" placeholder="0.00" styleClass="w-full"></p-inputNumber>
+      </div>
+    </div>
+
+    <div class="flex flex-column md:flex-row gap-4">
+      <div class="flex flex-column gap-2 flex-auto">
+        <label for="type" class="font-bold required-label">Type</label>
+        <p-select id="type" formControlName="type" [options]="categoryOptions" optionLabel="label" optionValue="value" placeholder="Select a Type" styleClass="w-full"></p-select>
+      </div>
+
+      <div class="flex flex-column gap-2 flex-auto">
+        <label for="subType" class="font-bold required-label">Sub Type</label>
+        <p-select id="subType" formControlName="subType" [options]="subTypeOptions" optionLabel="label" optionValue="value" placeholder="Select a Sub Type" styleClass="w-full"></p-select>
+      </div>
+    </div>
+
+    <div class="flex flex-column gap-2">
+      <label for="description" class="font-bold">Description</label>
+      <input pInputText id="description" formControlName="description" placeholder="Product description..." class="w-full" />
+    </div>
+
+    <div class="flex flex-column gap-2">
+      <label for="tags" class="font-bold">Tags</label>
+      <p-autoComplete formControlName="tags" [multiple]="true" [typeahead]="false" placeholder="Press Enter to add a tag" styleClass="w-full"></p-autoComplete>
+    </div>
+
+
+    <div class="flex flex-column gap-2">
+      <label class="font-bold">Product Images</label>
+      
+      <div class="flex flex-wrap gap-3">
+        <div class="relative w-6rem h-6rem border-round overflow-hidden surface-ground flex align-items-center justify-content-center" *ngFor="let url of imageUrls; let i = index">
+          <img [src]="url" alt="Preview" class="w-full h-full object-cover" />
+          <p-button icon="pi pi-times" [rounded]="true" [text]="true" severity="danger" class="absolute top-0 right-0 m-1" (click)="removeImage(i)"></p-button>
+        </div>
+        
+        <label class="w-6rem h-6rem border-round border-dashed border-2 border-300 surface-50 hover:surface-100 flex flex-column align-items-center justify-content-center cursor-pointer transition-colors transition-duration-150" [class.opacity-50]="isUploading">
+          <input type="file" hidden accept="image/*" (change)="onFileSelected($event)" [disabled]="isUploading" />
+          <i class="pi pi-camera text-2xl text-500 mb-1" *ngIf="!isUploading"></i>
+          <i class="pi pi-spin pi-spinner text-2xl text-500 mb-1" *ngIf="isUploading"></i>
+          <span class="text-xs text-500 font-medium">{{ isUploading ? 'Uploading' : 'Add Image' }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="flex justify-content-end gap-2 mt-4">
+      <p-button label="Cancel" icon="pi pi-times" severity="secondary" [outlined]="true" (click)="onCancel()"></p-button>
+      <p-button [label]="isEditMode ? 'Save Changes' : 'Create Product'" icon="pi pi-check" type="submit" [disabled]="form.invalid || isSubmitting" [loading]="isSubmitting"></p-button>
+    </div>
+  </form>
+</p-dialog>

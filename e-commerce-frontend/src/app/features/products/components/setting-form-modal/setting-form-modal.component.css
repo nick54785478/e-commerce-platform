@@ -1,0 +1,17 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+:host ::ng-deep .p-inputtext, :host ::ng-deep .p-dropdown, :host ::ng-deep .p-inputnumber-input {
+  /* Use default light theme styles provided by PrimeNG */
+}

@@ -1,0 +1,42 @@
+{
+  "/api/recommendations": {
+    "target": "http://localhost:8085",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api/recommendations": ""
+    }
+  },
+  "/api/behaviors": {
+    "target": "http://localhost:8084",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api/behaviors": ""
+    }
+  },
+  "/api/orders": {
+    "target": "http://localhost:8082",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api/orders": "/orders"
+    }
+  },
+  "/api/payments": {
+    "target": "http://localhost:8086",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api/payments": "/payments"
+    }
+  },
+  "/api": {
+    "target": "http://localhost:8083",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}

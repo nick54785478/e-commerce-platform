@@ -1,0 +1,21 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: recommendation-service
+  
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ecommerce_redis_pass
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+logging:
+  charset:
+    console: UTF-8
+    file: UTF-8

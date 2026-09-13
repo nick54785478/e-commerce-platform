@@ -1,0 +1,30 @@
+<p-toast></p-toast>
+<div class="flex items-center justify-center min-h-[70vh]">
+  <div class="bg-gray-200 dark:bg-gray-800 p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+    <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Checkout / Payment</h2>
+    <p class="text-gray-600 dark:text-gray-400 mb-6">
+      You are about to pay for order: <span class="font-bold">{{ orderId }}</span>
+    </p>
+    
+    <div class="mb-8 p-4 bg-gray-300 dark:bg-gray-700 rounded-lg">
+      <p class="text-sm text-gray-700 dark:text-gray-300">Total Amount</p>
+      <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+        <ng-container *ngIf="paymentAmount > 0; else loadingAmount">
+          NT$ {{ paymentAmount }}
+        </ng-container>
+        <ng-template #loadingAmount>
+          <i class="pi pi-spin pi-spinner text-lg"></i> Loading...
+        </ng-template>
+      </p>
+    </div>
+
+    <button 
+      pButton 
+      [loading]="isProcessing" 
+      (click)="processPayment()" 
+      class="p-button-success w-full justify-center text-lg py-3" 
+      label="Click to Pay" 
+      icon="pi pi-check">
+    </button>
+  </div>
+</div>

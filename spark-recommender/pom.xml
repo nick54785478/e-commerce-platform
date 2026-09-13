@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.omni.recommender</groupId>
+        <artifactId>omni-recommender-platform</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>spark-recommender</artifactId>
+    <packaging>jar</packaging>
+    <name>spark-recommender</name>
+
+    <properties>
+        <spark.version>3.5.1</spark.version>
+        <scala.version>2.12</scala.version>
+        <iceberg.version>1.5.0</iceberg.version>
+        <hadoop.version>3.3.4</hadoop.version>
+        <!-- Spark usually runs better with Java 17, but we can compile with 21 if configured correctly.
+             However, to be safe, let's target Java 17 for the Spark module. -->
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        
+        <!-- Force Jersey 2.x for Spark 3.5.x compatibility against Spring Boot 3 BOM -->
+        <jersey.version>2.40</jersey.version>
+    </properties>
+
+    <dependencies>
+        <!-- Spark Core & SQL -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-core_${scala.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scala.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+
+        <!-- Spark Kafka Integration for Structured Streaming -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql-kafka-0-10_${scala.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+        
+        <!-- Force Kafka Client version to match Spark 3.5.1 (override Spring Boot) -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+
+        <!-- Apache Iceberg Spark Runtime -->
+        <dependency>
+            <groupId>org.apache.iceberg</groupId>
+            <artifactId>iceberg-spark-runtime-3.5_${scala.version}</artifactId>
+            <version>${iceberg.version}</version>
+        </dependency>
+
+        <!-- Hadoop AWS for S3A / MinIO Support -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-aws</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+
+        <!-- Required for Spark UI/Hadoop on Java 17+ -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <!-- Spark MLlib -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_${scala.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+
+        <!-- Jedis for Redis Integration -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>5.1.2</version>
+        </dependency>
+
+        <!-- Gson for JSON Serialization -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+
+        <!-- Logging (SLF4J is brought in by Spark, but keeping log4j bindings clear) -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.12</version>
+        </dependency>
+    </dependencies>
+
+</project>

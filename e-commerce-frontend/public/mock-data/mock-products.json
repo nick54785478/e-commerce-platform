@@ -1,0 +1,102 @@
+﻿[
+  {
+    "name": "曼谷 5 天 4 夜探索之旅",
+    "description": "體驗曼谷的繁華與熱情，從經典大皇宮到熱鬧夜市，品嚐道地泰式美食。",
+    "price": 899.99,
+
+    "imageUrls": [
+      "/bangkok.png"
+    ],
+    "tags": ["Travel", "City", "Food"]
+  },
+  {
+    "name": "北京歷史文化深度遊",
+    "description": "走進歷史長河，探訪故宮與長城，感受古都的宏偉與深厚文化底蘊。",
+    "price": 1050.00,
+
+    "imageUrls": [
+      "/beijing.png"
+    ],
+    "tags": ["Culture", "History", "Travel"]
+  },
+  {
+    "name": "北海道夢幻冰雪自由行",
+    "description": "沉浸在雪國的浪漫中，享受頂級溫泉、新鮮海鮮與壯麗的冬季自然風光。",
+    "price": 1450.50,
+
+    "imageUrls": [
+      "/hokkaido.png"
+    ],
+    "tags": ["Winter", "Nature", "Hot Spring"]
+  },
+  {
+    "name": "香港城市夜景與購物之旅",
+    "description": "亞洲國際都會，從太平山頂俯瞰璀璨夜景，盡情享受購物與美食天堂。",
+    "price": 799.00,
+
+    "imageUrls": [
+      "/hongkong.png"
+    ],
+    "tags": ["Shopping", "City", "Night View"]
+  },
+  {
+    "name": "沖繩海島陽光度假沙灘",
+    "description": "悠閒的海島時光，清澈見底的海水與白沙灘，遠離喧囂的度假首選。",
+    "price": 1250.00,
+
+    "imageUrls": [
+      "/okinawa.png"
+    ],
+    "tags": ["Beach", "Relax", "Summer"]
+  },
+  {
+    "name": "大阪環球影城與美食體驗",
+    "description": "暢遊日本環球影城，並在道頓堀大啖章魚燒、大阪燒等平民美食。",
+    "price": 950.00,
+
+    "imageUrls": [
+      "/osaka.png"
+    ],
+    "tags": ["Theme Park", "Food", "Fun"]
+  },
+  {
+    "name": "首爾 K-Pop 與潮流文化之旅",
+    "description": "探索最新潮流文化，從明洞購物到傳統北村韓屋，感受新舊交融的首爾。",
+    "price": 820.00,
+
+    "imageUrls": [
+      "/seoul.png"
+    ],
+    "tags": ["Trend", "Culture", "K-Pop"]
+  },
+  {
+    "name": "上海魔都現代風情遊",
+    "description": "漫步外灘欣賞十里洋場，體驗現代魔都的繁華與歷史建築的完美結合。",
+    "price": 980.00,
+
+    "imageUrls": [
+      "/shanghai.png"
+    ],
+    "tags": ["City", "Modern", "Architecture"]
+  },
+  {
+    "name": "新加坡城市花園探險",
+    "description": "探訪濱海灣花園，體驗多種族文化融合的特色街區與世界級主題樂園。",
+    "price": 1150.00,
+
+    "imageUrls": [
+      "/singapore.png"
+    ],
+    "tags": ["Garden", "Family", "City"]
+  },
+  {
+    "name": "東京大都會極致購物行程",
+    "description": "從新宿到澀谷，體驗亞洲最繁華大都會的無盡魅力，購物與動漫聖地。",
+    "price": 1350.00,
+
+    "imageUrls": [
+      "/tokyo.png"
+    ],
+    "tags": ["Shopping", "Anime", "City"]
+  }
+]

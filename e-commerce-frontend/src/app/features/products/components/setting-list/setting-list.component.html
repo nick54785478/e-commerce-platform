@@ -1,0 +1,87 @@
+<div class="page-header animate-fade-in mb-4">
+  <div>
+    <h1 class="page-title text-3xl font-bold m-0">Product Settings</h1>
+    <p class="subtitle text-600 m-0 mt-1">Manage system configurations and dropdown options.</p>
+  </div>
+  <p-button label="New Setting" icon="pi pi-plus" (click)="openCreateModal()" styleClass="p-button-primary"></p-button>
+</div>
+
+<div class="p-4 bg-white border-round-xl shadow-2 animate-fade-in" style="border: 1px solid var(--surface-border);">
+  
+  <div class="flex flex-wrap gap-4 mb-4 align-items-end">
+    <div class="flex flex-column gap-2 w-full md:w-15rem">
+      <label class="text-sm font-semibold text-700">Data Type</label>
+      <p-select [options]="dataTypes" [(ngModel)]="selectedDataType" optionLabel="label" optionValue="value" [showClear]="true" placeholder="All" styleClass="w-full fixed-h" (onChange)="onDataTypeChange()"></p-select>
+    </div>
+    
+    <div class="flex flex-column gap-2 w-full md:w-15rem">
+      <label class="text-sm font-semibold text-700">Type</label>
+      <p-select [options]="types" [(ngModel)]="selectedType" optionLabel="label" optionValue="value" [showClear]="true" placeholder="All" styleClass="w-full fixed-h"></p-select>
+    </div>
+
+    <div class="flex flex-column gap-2 w-full md:w-15rem">
+      <label class="text-sm font-semibold text-700">Name</label>
+      <input pInputText type="text" [(ngModel)]="selectedName" placeholder="Keyword..." class="w-full fixed-h" />
+    </div>
+
+    <div class="flex flex-column gap-2 w-full md:w-15rem">
+      <label class="text-sm font-semibold text-700">Status</label>
+      <p-select [options]="activeFlagOptions" [(ngModel)]="selectedActiveFlag" optionLabel="label" optionValue="value" [showClear]="true" placeholder="All" styleClass="w-full fixed-h"></p-select>
+    </div>
+    
+    <div class="flex gap-2 ml-auto">
+      <p-button label="Search" icon="pi pi-search" (click)="onSearch()" styleClass="p-button-primary"></p-button>
+      <p-button label="Clear" icon="pi pi-filter-slash" (click)="clearFilter()" styleClass="p-button-secondary p-button-outlined"></p-button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <p-table [value]="settings" [paginator]="true" [rows]="10" 
+           sortField="priorityNo" [sortOrder]="1" responsiveLayout="scroll"
+           styleClass="p-datatable-sm p-datatable-striped">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="dataType">Data Type <p-sortIcon field="dataType"></p-sortIcon></th>
+        <th pSortableColumn="type">Type <p-sortIcon field="type"></p-sortIcon></th>
+        <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="code">Code <p-sortIcon field="code"></p-sortIcon></th>
+        <th pSortableColumn="value">Value <p-sortIcon field="value"></p-sortIcon></th>
+        <th pSortableColumn="priorityNo">Priority <p-sortIcon field="priorityNo"></p-sortIcon></th>
+        <th pSortableColumn="activeFlag">Status <p-sortIcon field="activeFlag"></p-sortIcon></th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-setting>
+      <tr>
+        <td><p-tag [value]="setting.dataType" severity="info"></p-tag></td>
+        <td>{{setting.type}}</td>
+        <td class="font-bold">{{setting.name}}</td>
+        <td><code>{{setting.code}}</code></td>
+        <td>{{setting.value}}</td>
+        <td>{{setting.priorityNo}}</td>
+        <td>
+          <p-tag [value]="setting.activeFlag === 'Y' ? 'Active' : 'Inactive'" 
+                 [severity]="setting.activeFlag === 'Y' ? 'success' : 'danger'"></p-tag>
+        </td>
+        <td>
+          <div class="flex gap-2">
+            <p-button icon="pi pi-pencil" styleClass="p-button-rounded p-button-text p-button-secondary" (click)="openEditModal(setting)"></p-button>
+            <p-button icon="pi pi-trash" styleClass="p-button-rounded p-button-text p-button-danger" (click)="deleteSetting(setting)"></p-button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="8" class="text-center p-4 text-500">No settings found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Modal Component -->
+<app-setting-form-modal 
+  *ngIf="showModal" 
+  [setting]="selectedSetting" 
+  (close)="closeModal($event)">
+</app-setting-form-modal>

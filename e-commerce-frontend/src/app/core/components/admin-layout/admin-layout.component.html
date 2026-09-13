@@ -1,0 +1,26 @@
+<div class="layout-wrapper flex flex-column min-h-screen surface-ground">
+  
+  <!-- Admin Header -->
+  <header class="bg-white text-900 shadow-1 flex align-items-center justify-content-between px-5 py-3 sticky top-0 z-5">
+    <div class="flex align-items-center cursor-pointer" routerLink="/">
+      <i class="pi pi-shield text-3xl mr-2 text-primary"></i>
+      <span class="font-bold text-2xl tracking-tighter">OmniStore <span class="font-normal text-600 text-lg ml-2">Backoffice</span></span>
+    </div>
+
+    <div class="flex align-items-center gap-4">
+      <a routerLink="/products" routerLinkActive="text-primary font-bold" [routerLinkActiveOptions]="{exact: true}" class="text-700 hover:text-primary transition-colors cursor-pointer no-underline"><i class="pi pi-tags mr-2"></i>Product Catalog</a>
+      <a routerLink="/products/settings" routerLinkActive="text-primary font-bold" class="text-700 hover:text-primary transition-colors cursor-pointer no-underline"><i class="pi pi-cog mr-2"></i>Product Settings</a>
+      <a routerLink="/inventory" routerLinkActive="text-primary font-bold" class="text-700 hover:text-primary transition-colors cursor-pointer no-underline"><i class="pi pi-box mr-2"></i>Inventory</a>
+      
+      <div class="border-left-1 border-300 h-2rem mx-2"></div>
+      
+      <a routerLink="/" class="text-500 hover:text-700 transition-colors cursor-pointer no-underline text-sm"><i class="pi pi-external-link mr-2"></i>Go to Store</a>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="flex-grow-1 p-5">
+    <router-outlet></router-outlet>
+  </main>
+  
+</div>

@@ -1,0 +1,75 @@
+.hero-section {
+  height: 70vh;
+  min-height: 500px;
+  background-image: url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.hero-overlay {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+}
+
+/* Enhance card hover effect */
+:host ::ng-deep .product-card .p-card-body {
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .product-card .p-card-content {
+  padding: 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-image-wrapper .image-overlay {
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
+}
+
+.card-image-wrapper:hover .image-overlay {
+  opacity: 1;
+}
+
+:host ::ng-deep .view-details-btn {
+  transform: translateY(20px);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-image-wrapper:hover ::ng-deep .view-details-btn {
+  transform: translateY(0);
+}
+
+/* Ensure the image scale effect works smoothly with the overlay */
+.card-image-wrapper img {
+  transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-image-wrapper:hover img {
+  transform: scale(1.1);
+}
+
+/* Dark mode overrides for select */
+:host ::ng-deep .dark-select {
+  background: var(--bg-glass) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: var(--text-primary) !important;
+}
+
+:host ::ng-deep .dark-select .p-select-label {
+  color: var(--text-primary) !important;
+}
+
+:host ::ng-deep .dark-select .p-select-dropdown {
+  color: var(--text-primary) !important;
+}
+
+/* Force dark overlay panel in PrimeNG 18 using global class if necessary, or just rely on body color */
+:host ::ng-deep .dark-select.p-select-open .p-select-list-wrapper {
+  background: var(--bg-secondary) !important;
+}

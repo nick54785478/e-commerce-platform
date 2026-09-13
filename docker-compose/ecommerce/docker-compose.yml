@@ -1,0 +1,209 @@
+
+# ===================================================================
+# E-Commerce Platform 分散式基礎設施 (Postgres + Redis + KRaft Kafka + Kafka UI + MinIO)
+# 架構對齊：拔除舊有 Hadoop/HBase，全面依賴現代化 Cloud-Native 組件
+# ===================================================================
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.9.2
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/plugins:/opt/airflow/plugins
+  networks:
+    - ecommerce-network
+
+x-airflow-common-env: &airflow-common-env
+  AIRFLOW__CORE__EXECUTOR: LocalExecutor
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:postgres@ecommerce-postgres:5432/ecommerce_db
+  AIRFLOW__CORE__FERNET_KEY: 46BKJoQYlPPOexq0OhDZnIlBpzINiC-Bwz7jM4vV6zU=
+  AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+
+services:
+
+  # 1. E-Commerce Postgres 關聯式資料庫 (供 Product Service 或未來其他服務使用)
+  ecommerce-postgres:
+    image: postgres:15-alpine
+    container_name: ecommerce-postgres
+    restart: "no" # 🛑 強制阻斷 Docker Desktop 開機自動啟動
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommerce_db
+      TZ: Asia/Taipei
+    volumes:
+      - ecommerce-postgres-data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+
+  # 2. Redis (網關限流與分散式快取，取代 HBase)
+  ecommerce-redis:
+    image: redis:7-alpine
+    container_name: ecommerce-redis
+    restart: "no" # 🛑 同步阻斷開機自啟
+    ports:
+      - "6379:6379"
+    # 設定 Redis 密碼，對齊企業級安全規範
+    command: redis-server --requirepass ecommerce_redis_pass
+    volumes:
+      - ecommerce-redis-data:/data
+    networks:
+      - ecommerce-network
+
+  # 📨 3. Kafka (KRaft 模式，內外雙網完美監聽，取代直接寫入 HDFS)
+  ecommerce-kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: ecommerce-kafka
+    restart: "no" # 🛑 強制阻斷 Docker Desktop 開機自動啟動
+    ports:
+      - "9092:9092" # 暴漏給主機端 Spring Boot 連線
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      # 核心優化：內外雙網監聽！
+      # INTERNAL (29092): 供 Docker 內部的 Kafka-UI 溝通
+      # EXTERNAL (9092): 供你本機的 Spring Boot 透過 localhost 連線
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://ecommerce-kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@ecommerce-kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk # KRaft 初始化必須的叢集 ID
+      TZ: Asia/Taipei
+    volumes:
+      - ecommerce-kafka-data:/var/lib/kafka/data
+    networks:
+      - ecommerce-network
+
+  # 4. Kafka UI (高顏值監控面板)
+  ecommerce-kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: ecommerce-kafka-ui
+    restart: "no" # 🛑 強制阻斷 Docker Desktop 開機自動啟動
+    depends_on:
+      - ecommerce-kafka
+    ports:
+      - "8090:8080" # 避開本機的 8080 Port，改用 8090
+    environment:
+      KAFKA_CLUSTERS_0_NAME: ecommerce-cluster
+      # 透過 Docker 內部網路 (INTERNAL) 連接 Kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: ecommerce-kafka:29092
+    networks:
+      - ecommerce-network
+
+  # 5. MinIO (物件儲存伺服器，S3 相容，取代 HDFS)
+  ecommerce-minio:
+    image: minio/minio:latest
+    container_name: ecommerce-minio
+    restart: "no"
+    ports:
+      - "9000:9000" # MinIO API
+      - "9001:9001" # Web UI Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      TZ: Asia/Taipei
+    command: server /data --console-address ":9001"
+    volumes:
+      - ecommerce-minio-data:/data
+    networks:
+      - ecommerce-network
+
+  # 6. Axon Server (Event Store & Command/Query Routing)
+  ecommerce-axon-server:
+    image: axoniq/axonserver:latest-dev
+    container_name: ecommerce-axon-server
+    restart: "no"
+    ports:
+      - "8024:8024" # HTTP UI
+      - "8124:8124" # gRPC Port for microservices
+    environment:
+      AXONIQ_AXONSERVER_NAME: "ecommerce-axon-server"
+      AXONIQ_AXONSERVER_HOSTNAME: "localhost"
+      AXONIQ_AXONSERVER_DEVMODE_ENABLED: "true"
+      AXONIQ_AXONSERVER_STANDALONE: "true"
+    volumes:
+      - ecommerce-axon-server-data:/data
+      - ecommerce-axon-server-events:/eventdata
+      - ecommerce-axon-server-config:/config
+    networks:
+      - ecommerce-network
+
+  # 7. Apache Spark Master (大數據運算大腦，整合 Iceberg)
+  ecommerce-spark-master:
+    image: apache/spark:3.5.1
+    container_name: ecommerce-spark-master
+    restart: "no"
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
+    ports:
+      - "8080:8080" # Spark Master Web UI
+      - "7077:7077" # Spark Master Port
+    networks:
+      - ecommerce-network
+
+  # 8. Apache Spark Worker (大數據運算節點)
+  ecommerce-spark-worker:
+    image: apache/spark:3.5.1
+    container_name: ecommerce-spark-worker
+    restart: "no"
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://ecommerce-spark-master:7077"]
+    depends_on:
+      - ecommerce-spark-master
+    ports:
+      - "8081:8081" # Spark Worker Web UI
+    networks:
+      - ecommerce-network
+
+  # 10. Apache Airflow Webserver (UI 控制台)
+  ecommerce-airflow-webserver:
+    <<: *airflow-common
+    container_name: ecommerce-airflow-webserver
+    command: webserver
+    ports:
+      - "8082:8080"
+    environment:
+      <<: *airflow-common-env
+    depends_on:
+      ecommerce-postgres:
+        condition: service_started
+
+  # 11. Apache Airflow Scheduler (任務調度器)
+  ecommerce-airflow-scheduler:
+    <<: *airflow-common
+    container_name: ecommerce-airflow-scheduler
+    command: scheduler
+    environment:
+      <<: *airflow-common-env
+    depends_on:
+      ecommerce-postgres:
+        condition: service_started
+
+# ===================================================================
+# 資料卷與共用網路定義
+# ===================================================================
+volumes:
+  ecommerce-postgres-data:
+    name: ecommerce-postgres-data
+  ecommerce-redis-data:
+    name: ecommerce-redis-data
+  ecommerce-kafka-data:
+    name: ecommerce-kafka-data
+  ecommerce-minio-data:
+    name: ecommerce-minio-data
+  ecommerce-axon-server-data:
+    name: ecommerce-axon-server-data
+  ecommerce-axon-server-events:
+    name: ecommerce-axon-server-events
+  ecommerce-axon-server-config:
+    name: ecommerce-axon-server-config
+
+networks:
+  ecommerce-network:
+    driver: bridge

@@ -1,0 +1,56 @@
+<header class="app-header bg-white shadow-1 flex align-items-center justify-content-between px-5 py-3">
+  <!-- Logo Section -->
+  <div class="logo-section flex align-items-center cursor-pointer" routerLink="/">
+    <i class="pi pi-shopping-bag text-primary text-3xl mr-2"></i>
+    <span class="font-bold text-2xl text-900 tracking-tighter">OmniStore</span>
+  </div>
+
+  <!-- Navigation & Search (Hidden on small screens) -->
+  <div class="nav-section hidden md:flex align-items-center gap-4 flex-grow-1 px-6">
+    <p-iconField iconPosition="left" class="w-full max-w-30rem">
+      <p-inputIcon styleClass="pi pi-search" />
+      <input type="text" pInputText placeholder="Search for products, brands, categories..." class="w-full p-inputtext-sm border-round-3xl" />
+    </p-iconField>
+    <a routerLink="/" class="nav-link font-medium text-700 hover:text-primary transition-colors cursor-pointer no-underline">Shop</a>
+  </div>
+
+  <!-- User Actions -->
+  <div class="user-actions flex align-items-center gap-3">
+    <p-button icon="pi pi-sparkles" [rounded]="true" [text]="true" severity="secondary" (click)="openRecommendations()" title="My Recommendations" styleClass="text-pink-500 hover:bg-pink-50"></p-button>
+    <p-button icon="pi pi-heart" [rounded]="true" [text]="true" severity="secondary"></p-button>
+    <p-button icon="pi pi-shopping-cart" [rounded]="true" [text]="true" severity="secondary" routerLink="/cart" 
+              [badge]="((cartTotalCount$ | async) || 0) > 0 ? ((cartTotalCount$ | async) || 0).toString() : ''" 
+              badgeSeverity="danger">
+    </p-button>
+    <p-button icon="pi pi-user" [rounded]="true" [outlined]="true" label="Sign In" class="hidden sm:inline-flex"></p-button>
+  </div>
+</header>
+
+<p-sidebar [(visible)]="showRecommendations" position="right" [style]="{width: '400px'}">
+  <ng-template pTemplate="header">
+    <div class="flex align-items-center gap-2">
+      <i class="pi pi-sparkles text-pink-500 text-xl"></i>
+      <span class="font-bold text-xl text-900">Recommended For You</span>
+    </div>
+  </ng-template>
+
+  <div *ngIf="loadingRecommendations" class="flex justify-content-center p-5 mt-5">
+     <i class="pi pi-spin pi-spinner text-primary" style="font-size: 2.5rem"></i>
+  </div>
+  
+  <div *ngIf="!loadingRecommendations && recommendedProducts.length === 0" class="p-5 mt-5 text-center text-500">
+    <i class="pi pi-inbox text-4xl mb-3 text-300"></i>
+    <p class="m-0">No recommendations available at this time.</p>
+  </div>
+  
+  <div class="flex flex-column gap-3 mt-3" *ngIf="!loadingRecommendations && recommendedProducts.length > 0">
+    <div class="flex align-items-center p-3 border-round-2xl shadow-1 surface-card cursor-pointer hover:shadow-3 transition-all transition-duration-200" *ngFor="let item of recommendedProducts">
+       <img [src]="item.imageUrls && item.imageUrls.length > 0 ? item.imageUrls[0] : fallbackImage" class="w-5rem h-5rem object-cover border-round-xl mr-3 shadow-1" />
+       <div class="flex-grow-1 overflow-hidden">
+         <div class="font-bold text-900 line-height-3 text-overflow-ellipsis overflow-hidden white-space-nowrap mb-1">{{ item.name }}</div>
+         <div class="text-600 text-sm mb-2 text-overflow-ellipsis overflow-hidden white-space-nowrap">{{ item.description }}</div>
+         <div class="text-primary font-bold">{{ item.price | currency:'TWD':'symbol':'1.0-0' }}</div>
+       </div>
+    </div>
+  </div>
+</p-sidebar>

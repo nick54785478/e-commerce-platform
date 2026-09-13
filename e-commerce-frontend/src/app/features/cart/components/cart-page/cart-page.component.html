@@ -1,0 +1,73 @@
+<p-toast></p-toast>
+<div class="cart-container p-5 animate-fade-in">
+  <h1 class="text-4xl font-bold text-900 mb-5 tracking-tighter">Your Shopping Cart</h1>
+
+  <ng-container *ngIf="(cartItems$ | async) as items">
+    <div *ngIf="items.length > 0; else emptyCart" class="grid grid-nogutter gap-5">
+      
+      <!-- Cart Items List -->
+      <div class="col-12 lg:col-7 xl:col-8">
+        <div *ngFor="let item of items" class="cart-item">
+          <img [src]="item.imageUrl || fallbackImage" [alt]="item.name" class="item-image" (error)="handleImageError($event)">
+          
+          <div class="item-details">
+            <h3 class="item-name">{{ item.name }}</h3>
+            <p class="text-500 text-sm mb-2">In Stock: {{ item.stock }}</p>
+            <div class="item-price">{{ item.price | currency:'TWD':'symbol':'1.0-0' }}</div>
+          </div>
+          
+          <div class="flex align-items-center gap-4">
+            <p-inputNumber 
+              [ngModel]="item.quantity" 
+              (ngModelChange)="updateQuantity(item.productId, $event)" 
+              [showButtons]="true" 
+              buttonLayout="horizontal" 
+              inputId="horizontal" 
+              spinnerMode="horizontal" 
+              [step]="1" 
+              [min]="1" 
+              [max]="item.stock"
+              decrementButtonClass="p-button-secondary p-button-text" 
+              incrementButtonClass="p-button-secondary p-button-text" 
+              incrementButtonIcon="pi pi-plus" 
+              decrementButtonIcon="pi pi-minus" 
+              styleClass="w-8rem">
+            </p-inputNumber>
+            
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (click)="removeItem(item.productId)" title="Remove item"></p-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="col-12 lg:col-4 xl:col-3 flex-grow-1">
+        <div class="summary-card">
+          <h2 class="text-2xl font-bold text-900 mb-4">Order Summary</h2>
+          
+          <div class="summary-row">
+            <span>Items ({{ cartTotalCount$ | async }})</span>
+            <span>{{ (cartTotalPrice$ | async) | currency:'TWD':'symbol':'1.0-0' }}</span>
+          </div>
+          
+          <div class="summary-row total">
+            <span>Total</span>
+            <span>{{ (cartTotalPrice$ | async) | currency:'TWD':'symbol':'1.0-0' }}</span>
+          </div>
+          
+          <p-button label="Proceed to Checkout" icon="pi pi-check" size="large" styleClass="w-full mt-4 border-round-xl font-bold shadow-4" (click)="checkout()"></p-button>
+          
+          <p-button label="Continue Shopping" icon="pi pi-arrow-left" routerLink="/" [outlined]="true" size="large" styleClass="w-full mt-3 border-round-xl"></p-button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #emptyCart>
+    <div class="empty-state">
+      <i class="pi pi-shopping-cart text-6xl text-300 mb-4 block"></i>
+      <h2 class="text-3xl font-bold text-700 mb-3">Your cart is empty</h2>
+      <p class="text-500 mb-5 text-lg">Looks like you haven't added anything to your cart yet.</p>
+      <p-button label="Continue Shopping" icon="pi pi-arrow-left" routerLink="/" [outlined]="true" size="large" styleClass="border-round-xl"></p-button>
+    </div>
+  </ng-template>
+</div>

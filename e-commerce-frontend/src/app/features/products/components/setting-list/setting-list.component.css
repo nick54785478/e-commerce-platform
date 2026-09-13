@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+:host ::ng-deep .fixed-h {
+  height: 46px !important;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .fixed-h .p-select-label {
+  display: flex;
+  align-items: center;
+}
