@@ -34,7 +34,7 @@
 
 2. **執行扣款 (Process Payment)**
    * **指令**: `ProcessPaymentCommand`
-   * **情境**: 使用者於前端填寫信用卡資訊並送出結帳時 (目前實作為自動模擬成功)。
+   * **情境**: 使用者於前端填寫信用卡資訊並送出結帳時 (現已整合 Stripe Checkout，供實際金流測試)。
    * **邏輯**: 驗證付款狀態必須是「未付款」，並校驗前端傳入的 `amount` 是否等於建立時的金額，避免竄改。驗證通過後，發佈 `PaymentProcessedEvent`。這會觸發 Saga 去執行「庫存確認扣減」與後續的出貨通知。
 
 3. **取消付款 (Cancel Payment)**
@@ -49,9 +49,39 @@
 
 ---
 
+## 第三方金流 (Stripe) 整合
+
+本服務已整合 [Stripe Checkout](https://stripe.com/payments/checkout) 以處理實際的金流交易。
+
+### 結帳流程
+1. 前端呼叫本微服務的 REST API (`/api/v1/stripe/create-checkout-session`)。
+2. 本服務利用 Stripe Java SDK 建立一筆 `Session`，並回傳專屬的付款 `url`。
+3. 前端接收到 `url` 後直接跳轉至 Stripe 的安全結帳頁面。
+4. 交易成功或取消後，Stripe 會將使用者導向至預設的回傳路由 (Success/Cancel URL)。
+
+### 金鑰設定 (開發與測試環境)
+
+> **注意：** 基於安全性，請勿將正式環境的 Secret Key ( `sk_live_...` ) 寫死在程式碼中。以下為開發用的測試設定。
+
+請前往 [Stripe Dashboard](https://dashboard.stripe.com/) 取得您的**測試秘密金鑰 (Secret Key)**，並將其設定在 `src/main/resources/application.yml` 中：
+
+```yaml
+stripe:
+  api:
+    # 請在此填入以 sk_test_ 開頭的 Stripe 測試金鑰
+    secretKey: sk_test_YOUR_STRIPE_SECRET_KEY
+  webhook:
+    secret: YOUR_STRIPE_WEBHOOK_SECRET
+```
+
+*(目前前端不需要引入 Stripe.js 或設定公開金鑰，直接透過本微服務取得的 URL跳轉即可。)*
+
+---
+
 ## 快速開始
 
 1. 確保 Axon Server 正常運行 (可透過根目錄的 docker-compose 建立容器)。
 2. 本微服務無須外部的關聯式資料庫 (其狀態由 Axon Server 中的 Event Store 重建)。
 3. 確保 `shared-apis` 已經成功 `mvn install` 編譯。
-4. 啟動 Spring Boot 應用程式即可開始服務。
+4. 確保您已在 `application.yml` 中填入正確的 `stripe.api.secretKey`。
+5. 啟動 Spring Boot 應用程式即可開始服務。
