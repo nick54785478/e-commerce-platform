@@ -16,6 +16,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/cart/components/cart-page/cart-page.component').then(m => m.CartPageComponent)
       },
       {
+        path: 'payment/success',
+        loadComponent: () => import('./features/payment/components/payment-success/payment-success.component').then(m => m.PaymentSuccessComponent)
+      },
+      {
+        path: 'payment/cancel',
+        loadComponent: () => import('./features/payment/components/payment-cancel/payment-cancel.component').then(m => m.PaymentCancelComponent)
+      },
+      {
         path: 'payment/:orderId',
         loadComponent: () => import('./features/payment/components/payment-page/payment-page.component').then(m => m.PaymentPageComponent)
       }

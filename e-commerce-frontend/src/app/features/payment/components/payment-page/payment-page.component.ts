@@ -7,6 +7,7 @@ import { ToastModule } from 'primeng/toast';
 import { OrderService } from '../../../../core/services/order.service';
 import { PaymentService } from '../../services/payment.service';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-payment-page',
@@ -75,20 +76,22 @@ export class PaymentPageComponent implements OnInit, OnDestroy {
 
     this.isProcessing = true;
     
-    this.paymentService.processPayment(this.paymentId, {
+    this.paymentService.createCheckoutSession({
+      paymentId: this.paymentId,
       orderId: this.orderId,
       amount: this.paymentAmount
     }).subscribe({
-      next: () => {
-        this.isProcessing = false;
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Payment successful!' });
-        setTimeout(() => {
-          this.router.navigate(['/']);
-        }, 2000);
+      next: (res) => {
+        if (res.url) {
+          window.location.href = res.url;
+        } else {
+          this.isProcessing = false;
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid Stripe Session URL.' });
+        }
       },
       error: (err) => {
         this.isProcessing = false;
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Payment failed!' });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to initialize payment session!' });
         console.error(err);
       }
     });

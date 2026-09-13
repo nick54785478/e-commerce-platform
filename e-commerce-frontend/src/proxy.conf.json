@@ -31,6 +31,11 @@
       "^/api/payments": "/payments"
     }
   },
+  "/api/v1/stripe": {
+    "target": "http://localhost:8086",
+    "secure": false,
+    "changeOrigin": true
+  },
   "/api": {
     "target": "http://localhost:8083",
     "secure": false,

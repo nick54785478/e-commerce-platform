@@ -13,11 +13,17 @@ export interface PaymentProcessedResource {
   paymentId: string;
 }
 
+export interface CreateCheckoutSessionResponse {
+  sessionId: string;
+  url: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class PaymentService {
   private apiUrl = '/api/payments';
+  private stripeApiUrl = '/api/v1/stripe';
 
   constructor(private http: HttpClient) {}
 
@@ -25,5 +31,9 @@ export class PaymentService {
     // TODO: 未來預計在這裡介接第三方金流 API (如 Stripe, LinePay)
     // 目前預設都是 Success，直接打後端的 Process API 觸發後續 Saga 流程
     return this.http.put<PaymentProcessedResource>(`${this.apiUrl}/${paymentId}/process`, payload);
+  }
+
+  createCheckoutSession(payload: ProcessPaymentPayload & { paymentId: string }): Observable<CreateCheckoutSessionResponse> {
+    return this.http.post<CreateCheckoutSessionResponse>(`${this.stripeApiUrl}/create-checkout-session`, payload);
   }
 }
