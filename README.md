@@ -24,6 +24,78 @@
 - **`payment-service`**: 付款微服務。模擬第三方金流串接，處理付款成功、失敗及退款。
 - **`shared-apis`**: 跨服務共用的 API 模組 (如 `inventory-api`, `payment-api`)，統一定義 Domain Commands 與 Events。
 
+#### 🔄 OrderManagementSaga 分散式交易流程
+
+以下流程圖展示了 `OrderManagementSaga` 如何協調 `order-service`、`inventory-service` 與 `payment-service`：
+
+```mermaid
+stateDiagram-v2
+    direction TB
+    
+    %% 定義各種微服務的色彩標籤
+    classDef saga fill:#f9f0ff,stroke:#b19cd9,stroke-width:2px,color:black
+    classDef order fill:#e6f3ff,stroke:#4da6ff,stroke-width:2px,color:black
+    classDef inventory fill:#e6ffe6,stroke:#4dff4d,stroke-width:2px,color:black
+    classDef payment fill:#fff2e6,stroke:#ffa64d,stroke-width:2px,color:black
+    classDef error fill:#ffe6e6,stroke:#ff4d4d,stroke-width:2px,color:black
+
+    [*] --> OrderCreatedEvent: 使用者結帳
+
+    state "Saga 啟動 (StartSaga)" as SagaStart {
+        OrderCreatedEvent:::order --> ReserveStockCommand
+        note right of ReserveStockCommand
+            同時設定 10 分鐘 
+            Payment Deadline
+        end note
+    }
+
+    state "庫存預扣階段" as InventoryPhase {
+        ReserveStockCommand:::inventory --> StockReservedEvent: 鎖定庫存成功
+        ReserveStockCommand:::inventory --> CancelOrderCommand: 鎖定庫存失敗 (商品缺貨)
+    }
+
+    state "付款處理階段" as PaymentPhase {
+        StockReservedEvent:::inventory --> CreatePaymentCommand
+        CreatePaymentCommand:::payment --> PaymentProcessedEvent: 付款成功 (Stripe Webhook)
+        
+        %% 超時機制
+        PaymentDeadline[10分鐘未付款超時]:::error --> CancelOrderCommand
+    }
+
+    state "出貨準備階段" as ShipmentPhase {
+        PaymentProcessedEvent:::payment --> ConfirmStockReservationCommand
+        PaymentProcessedEvent:::payment --> NotifyShipmentCommand
+        ConfirmStockReservationCommand:::inventory --> OrderNotifiedEvent
+        NotifyShipmentCommand:::order --> OrderNotifiedEvent
+    }
+
+    OrderNotifiedEvent:::order --> [*]: Saga 流程結束 (成功)
+
+    %% 補償機制 (Compensation)
+    state "Saga 補償機制 (Compensation)" as Compensation {
+        CancelOrderCommand:::order --> OrderCancelledEvent
+        OrderReturnedEvent:::order --> PerformCompensation
+        OrderCancelledEvent:::order --> PerformCompensation
+        
+        state PerformCompensation {
+            direction LR
+            state check_payment <<choice>>
+            check_payment --> PaymentCompleted: 付款已完成
+            check_payment --> PaymentNotCompleted: 付款未完成
+            
+            PaymentCompleted --> AddStockCommand: 歸還實體庫存
+            PaymentCompleted --> RefundPaymentCommand: 發起退款
+            
+            PaymentNotCompleted --> CancelStockReservationCommand: 釋放庫存鎖定
+            PaymentNotCompleted --> CancelPaymentCommand: 取消付款意圖
+        }
+    }
+    
+    PerformCompensation --> [*]: Saga 流程終止 (SagaLifecycle.end)
+    
+    class SagaStart, Compensation saga
+```
+
 ### 📊 數據與推薦引擎 (Data & Recommendation)
 - **`behavior-service`**: 行為採集服務。蒐集前端使用者的瀏覽 (VIEW)、加入最愛 (FAVORITE) 等行為 (準備對接 Kafka)。
 - **`recommendation-service`**: 推薦引擎服務。提供個人化推薦清單 (準備對接 Redis)。

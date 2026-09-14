@@ -16,23 +16,23 @@
 ### 🎯 解決方案與具體實作步驟
 為確保各領域邊界清晰，並提升系統可用性，預計進行以下拆分：
 
-1. **第一階段 (Phase 1)：金流服務獨立**
-   - 建立 `payment-service` Spring Boot 專案。
-   - 實作建立付款意圖、模擬付款成功與退款指令。
-   - 確保 `order-service` 中的 `OrderManagementSaga` 能收到 `PaymentProcessedEvent` 並順利走完全程。
-2. **第二階段 (Phase 2)：庫存服務分離**
-   - 建立 `inventory-service` Spring Boot 專案。
-   - 將原本位於 `product-service` 的 `ReduceStockCommand` 與 `AddStockCommand` 邏輯遷移至此。
-   - 解決 `product-service` 的高寫入負擔，確保精準計算與鎖定商品庫存，防止超賣。
-3. **第三階段 (Phase 3)：前端整合**
-   - 完善 Angular 前端的購物車與結帳流程。
-   - 整合攔截器處理跨租戶的 API 呼叫。
+1. **[已完成] 第一階段 (Phase 1)：金流服務獨立**
+   - [x] 建立 `payment-service` Spring Boot 專案。
+   - [x] 整合 Stripe Checkout 實作真實金流付款意圖與跳轉，並處理 Webhook。
+   - [x] 確保 `order-service` 中的 `OrderManagementSaga` 能收到 `PaymentProcessedEvent` 並順利走完全程。
+2. **[已完成] 第二階段 (Phase 2)：庫存服務分離**
+   - [x] 建立 `inventory-service` Spring Boot 專案。
+   - [x] 將原本位於 `product-service` 的 `ReduceStockCommand` 與 `AddStockCommand` 邏輯遷移至此。
+   - [x] 解決 `product-service` 的高寫入負擔，確保精準計算與鎖定商品庫存，防止超賣。
+3. **[已完成] 第三階段 (Phase 3)：前端整合**
+   - [x] 完善 Angular 前端的購物車與結帳流程。
+   - [x] 整合攔截器處理跨租戶的 API 呼叫。
 
 ---
 
-## 📌 [Epic] 透過 Apache Kafka 升級為事件驅動架構 (EDA)
+## 📌 [已完成] [Epic] 透過 Apache Kafka 升級為事件驅動架構 (EDA)
 
-**狀態**: 📋 待辦 (Backlog)  
+**狀態**: ✅ 已完成 (Done)  
 **優先級**: 🔥 高 (下一階段架構演進)  
 **領域**: 資料寫入與串流 (Data Ingestion & Streaming)
 
@@ -54,20 +54,20 @@
    - *消費者 3 (規則引擎)*: 偵測使用者高意圖行為（如多次放入購物車）立刻觸發推播。
 
 ### 🛠️ 具體實作步驟
-- [ ] **基礎設施**: 在 `docker-compose.yml` 中加入 Apache Kafka 與 Zookeeper (或採用 KRaft 模式)。
-- [ ] **基礎設施**: 加入 Kafka Connect 容器，並安裝 HDFS Sink Connector 外掛。
-- [ ] **後端 (`behavior-service`)**: 
+- [x] **基礎設施**: 在 `docker-compose.yml` 中加入 Apache Kafka 與 Zookeeper (或採用 KRaft 模式)。
+- [x] **基礎設施**: 加入 Kafka Connect 容器，並安裝 HDFS Sink Connector 外掛。
+- [x] **後端 (`behavior-service`)**: 
   - 引入 `spring-kafka` 依賴。
   - 重構 `BehaviorApplicationService`，將寫入動作改為透過 `BehaviorKafkaEventPort` 發送 JSON 訊息至 Kafka Topic (`user-behavior-events`)。
   - [x] ~~廢棄並移除 `HdfsUploadScheduler` 與 `BehaviorHdfsShipperPort`~~ (已提前清理，消滅技術債)。
-- [ ] **資料管線 (Data Pipeline)**: 設定 Kafka Connect，使其自動將 `user-behavior-events` Topic 裡的訊息，依照日期分區 (Partition) 直接落入 HDFS 中。
-- [ ] *(選用)* **Spark 重構**: 修改 Spark 批次訓練任務，改為透過 Spark Structured Streaming 直接從 Kafka 消費資料，完成從批次 (Batch) 到 Lambda 架構的完美轉型。
+- [x] **資料管線 (Data Pipeline)**: 設定 Kafka Connect，使其自動將 `user-behavior-events` Topic 裡的訊息，依照日期分區 (Partition) 直接落入 HDFS 中。
+- [x] *(選用)* **Spark 重構**: 修改 Spark 批次訓練任務，改為透過 Spark Structured Streaming 直接從 Kafka 消費資料，完成從批次 (Batch) 到 Lambda 架構的完美轉型。
 
 ---
 
-## 📌 [Epic] 雲端原生升級：以 MinIO 取代 HDFS 成為新世代資料湖泊 (Data Lake)
+## 📌 [已完成] [Epic] 雲端原生升級：以 MinIO 取代 HDFS 成為新世代資料湖泊 (Data Lake)
 
-**狀態**: 📋 待辦 (Backlog)  
+**狀態**: ✅ 已完成 (Done)  
 **優先級**: 🌟 中 (待 Kafka 導入後接續進行)  
 **領域**: 物件儲存與資料湖泊 (Object Storage & Data Lake)
 
@@ -84,21 +84,21 @@
 3. **生態系極佳**: Spark 完美支援透過 `s3a://` 協定直接讀取 MinIO 裡面的檔案進行運算，整體資料管線的轉型將極為平順。
 
 ### 🛠️ 具體實作步驟
-- [ ] **基礎設施**: 在 `docker-compose.yml` 中移除 HDFS (NameNode, DataNode) 的相關設定。
-- [ ] **基礎設施**: 在 `docker-compose.yml` 中加入 MinIO 容器，並透過預先初始化的腳本建立好專屬的 Bucket (例如 `omni-data-lake`)。
-- [ ] **後端 (`behavior-service`)**: 
+- [x] **基礎設施**: 在 `docker-compose.yml` 中移除 HDFS (NameNode, DataNode) 的相關設定。
+- [x] **基礎設施**: 在 `docker-compose.yml` 中加入 MinIO 容器，並透過預先初始化的腳本建立好專屬的 Bucket (例如 `omni-data-lake`)。
+- [x] **後端 (`behavior-service`)**: 
   - 引入 AWS S3 SDK (例如 `software.amazon.awssdk:s3`)。
   - 將原本與 `org.apache.hadoop.fs.FileSystem` 互動的 HDFS 上傳邏輯，改寫為上傳至 S3 Bucket 的邏輯。
-- [ ] **大數據端 (`spark-recommender`)**: 
+- [x] **大數據端 (`spark-recommender`)**: 
   - 引入 `hadoop-aws` 依賴。
   - 將 Spark 的設定加上 MinIO 的 Endpoint URL 與 Access Keys。
   - 將 `RecommenderBatchJob.java` 的讀取路徑由 `hdfs://namenode:8020/data/...` 更改為 `s3a://omni-data-lake/data/...`。
 
 ---
 
-## 📌 [Epic] 現代資料湖倉轉型：導入 Apache Iceberg 取代傳統 Hive
+## 📌 [已完成] [Epic] 現代資料湖倉轉型：導入 Apache Iceberg 取代傳統 Hive
 
-**狀態**: 📋 待辦 (Backlog)  
+**狀態**: ✅ 已完成 (Done)  
 **優先級**: 🌟 中 (建議與 MinIO 升級一併或接續進行)  
 **領域**: 資料湖倉架構 (Data Lakehouse)
 
@@ -118,16 +118,16 @@
 4. **雲端物件儲存極致最佳化**: Iceberg 直接透過 Metadata 檔案記錄實體資料路徑，完全避開了 S3/MinIO 上昂貴的目錄掃描操作，查詢速度獲得質的飛躍。
 
 ### 🛠️ 具體實作步驟
-- [ ] **基礎設施**: 更新 Spark 與 Hive Metastore 的依賴，加入 `iceberg-spark-runtime` 套件。
-- [ ] **Catalog 設定**: 在 Spark 中配置 Iceberg Catalog（可沿用現有的 Hive Metastore，或改用更輕量的 JDBC / REST Catalog）。
-- [ ] **資料遷移**: 將現有建立的 Hive External Table 轉換或重新寫入為 Iceberg 表格格式。
-- [ ] **資料管線更新**: 
+- [x] **基礎設施**: 更新 Spark 與 Hive Metastore 的依賴，加入 `iceberg-spark-runtime` 套件。
+- [x] **Catalog 設定**: 在 Spark 中配置 Iceberg Catalog（可沿用現有的 Hive Metastore，或改用更輕量的 JDBC / REST Catalog）。
+- [x] **資料遷移**: 將現有建立的 Hive External Table 轉換或重新寫入為 Iceberg 表格格式。
+- [x] **資料管線更新**: 
   - 確保從 Kafka 或 HDFS 寫入的資料流（透過 Spark Structured Streaming 或 Kafka Connect）對接至 Iceberg 表格。
   - 實作資料整理排程任務 (Compaction Job)，定期合併 Iceberg 產生的小檔案，保持最佳查詢效能。
 
-## 📌 [Epic] 極速推薦快取：以 Redis 取代 HBase
+## 📌 [已完成] [Epic] 極速推薦快取：以 Redis 取代 HBase
 
-**狀態**: 📋 待辦 (Backlog)  
+**狀態**: ✅ 已完成 (Done)  
 **優先級**: 🌟 高 (可獨立進行，顯著降低維運成本)  
 **領域**: 線上服務層 (Serving Layer)
 
@@ -143,11 +143,11 @@
 3. **雲端託管無縫接軌**: 在公有雲上，Redis 有非常成熟的託管服務 (如 AWS ElastiCache 或 GCP Memorystore)，能輕易達成高可用性 (HA) 與自動擴容。
 
 ### 🛠️ 具體實作步驟
-- [ ] **基礎設施**: 在 `docker-compose.yml` 中移除 HBase (HMaster, RegionServer) 與 ZooKeeper，並加入 `redis` 容器。
-- [ ] **大數據端 (`spark-recommender`)**: 
+- [x] **基礎設施**: 在 `docker-compose.yml` 中移除 HBase (HMaster, RegionServer) 與 ZooKeeper，並加入 `redis` 容器。
+- [x] **大數據端 (`spark-recommender`)**: 
   - 移除 HBase 相關相依套件，引入 Jedis 或 Lettuce 等 Redis Client。
   - 將 Spark 運算完的 Dataframe 轉換為 Key-Value 格式，寫入 Redis。
-- [ ] **後端 (`recommendation-service`)**: 
+- [x] **後端 (`recommendation-service`)**: 
   - 移除 `hbase-client`，引入 `spring-boot-starter-data-redis`。
   - 實作新的 `RecommendationRedisAdapter`，以 `StringRedisTemplate` 透過 UserId 快速抓取並反序列化推薦清單。
 
@@ -220,3 +220,26 @@ flowchart TD
    - 在接收到建立訂單指令 (Create Order Command) 時，根據購物車內容與買家資訊，動態計算並產生完整的計價明細後，再寫入資料庫。
 2. **未來擴充 (獨立 PricingService)**:
    - 若系統後續導入促銷模組 (Promotion)、折價券 (Coupon) 或需串接第三方物流 API 即時查詢運費，應考慮將計價邏輯從 `OrderService` 剝離，建立專屬的 `PricingService` 微服務。
+
+---
+
+## 📌 [Epic] 擴展物流領域：新增 Shipment Service 與出貨 Saga
+
+**狀態**: 📋 待辦 (Backlog)  
+**優先級**: 🌟 中 (待實體商品業務需求明確後進行)  
+**領域**: 後端微服務架構 (Backend Architecture)
+
+### 📖 背景與問題痛點
+目前系統的 `OrderManagementSaga` 在收到付款完成 (`PaymentProcessedEvent`) 後，僅單純發送出貨通知 (`NotifyShipmentCommand`) 更新訂單狀態為「已出貨 (SHIPPED)」，並未有實際的物流與出貨流程。對於未來若需處理實體商品物流、拆單出貨、計算複雜運費、或串接第三方物流 (如黑貓、FedEx) 來說，目前的設計過於簡單且職責不分明。
+
+### 🎯 解決方案
+建立獨立的 `shipment-service` 微服務，專職負責物流與配送狀態機。並將 `OrderManagementSaga` 擴充，使其在付款完成後，發送指令交由 `shipment-service` 處理實際出貨，等待出貨完成後再將訂單結案。
+
+### 🛠️ 具體實作步驟
+- [ ] **微服務建立**: 建立 `shipment-service` Spring Boot 專案。
+- [ ] **領域模型設計**: 設計 `Shipment` 聚合根，定義狀態機 (如準備中、已出貨、運送中、已送達、退件等)。
+- [ ] **Saga 流程改造**: 
+  - 修改 `OrderManagementSaga`，在收到 `PaymentProcessedEvent` 後改為發出 `CreateShipmentCommand` 至 `shipment-service`。
+  - Saga 等待 `shipment-service` 廣播的 `ShipmentCreatedEvent` 或 `ShipmentDispatchedEvent`，再更新訂單最終狀態為已出貨。
+- [ ] **補償機制完善**: 擴充退款流程，若物流已出貨則無法直接退款，需走人工攔截或退貨流程。
+
