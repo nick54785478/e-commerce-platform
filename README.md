@@ -1,20 +1,21 @@
-# E-Commerce Platform (Modern Data Lakehouse Edition) 🚀
+# E-Commerce Platform (with Recommender System) 🚀
 
-這是從原本的 Omni-Recommender Platform 分支出來的 **全新 V2 架構** 儲存庫。
+這是一個完整的現代化電子商務平台，結合了先進的 **大數據推薦系統** 與 **微服務架構**，提供從商品瀏覽、個人化推薦到購物車與結帳的完整電商閉環體驗。
 
-## 🌟 架構願景 (Architecture Vision)
+## 🌟 核心特色 (Core Features)
 
-我們正在進行「大數據基礎設施的雲端原生轉型」。本專案將放棄傳統笨重的 Hadoop / HBase 架構，全面轉向事件驅動與湖倉一體化 (Modern Data Lakehouse) 架構：
+1. **電商完整閉環**: 涵蓋商品型錄、庫存鎖定、購物車管理、Stripe 金流整合，以及訂單狀態生命週期管理。
+2. **分散式交易 (Saga Pattern)**: 透過 Saga 模式完美協調訂單、庫存與付款等多個微服務，並具備完善的失敗退款與庫存補償機制。
+3. **個人化推薦引擎**: 結合使用者的瀏覽與加入最愛行為，透過 Spark ALS 模型進行協同過濾運算，提供亞毫秒級的個人化商品推薦。
 
-1. **事件驅動 (Event-Driven)**: 引入 **Apache Kafka**，將微批次檔案寫入升級為即時串流處理。
-2. **現代資料湖倉 (Modern Data Lakehouse)**: 拔除 HDFS，改用輕量級、S3 相容的 **MinIO**，並搭配 **Apache Iceberg** 實作具備 ACID 交易能力的資料湖倉。
-3. **極速快取 (Ultra-Fast Cache)**: 以純記憶體的 **Redis** 取代笨重的 HBase，提供亞毫秒級的推薦清單查詢。
-4. **商品微服務 (Product Service)**: 新增一個 `product-service` 來管理真實的商品與機票，補齊電商閉環，不再依賴前端寫死的 Mock Data。
+## 🚀 技術架構 (Technology Architecture)
 
-## 🚀 專案現狀
+本專案採用最先進的雲端原生與大數據技術棧建構：
 
-目前系統處於「基礎設施重置」狀態（Clean State）。
-所有與 Hadoop/HBase 相關的依賴與程式碼皆已徹底清除。
+- **微服務與事件溯源**: 核心業務基於 **Spring Boot 3** 與 **Axon Framework** 構建，大量運用 CQRS 與 Event Sourcing 模式。
+- **事件驅動 (Event-Driven)**: 引入 **Apache Kafka**，將使用者行為日誌採集升級為即時串流處理，與推薦系統完美解耦。
+- **現代資料湖倉 (Modern Data Lakehouse)**: 採用輕量級、S3 相容的 **MinIO**，並搭配 **Apache Iceberg** 實作具備 ACID 交易能力的資料湖倉。
+- **極速快取 (Ultra-Fast Cache)**: 以純記憶體的 **Redis** 作為推薦引擎快取，提供亞毫秒級的查詢效能。
 
 ### 🛍️ 電商交易核心 (CQRS & Event Sourcing)
 基於 **Axon Framework** 構建，大量運用 CQRS 與 Event Sourcing 模式處理核心業務。
